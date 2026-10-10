@@ -4,6 +4,7 @@ import { ofetch } from "ofetch";
 import { joinURL } from "ufo";
 import db from "#/db";
 import { users } from "#/db/schema";
+import { oidcConfig } from "#/lib/oidc";
 import { createSession } from "#/lib/session";
 
 interface TokenResponse {
@@ -15,18 +16,18 @@ interface UserInfoResponse {
   sub: string;
   email: string;
   email_verified: boolean;
-  name: string;
-  given_name: string;
-  family_name: string;
-  nickname: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  nickname?: string;
   updated_at: number;
-  slack_id: string;
-  verification_status:
+  slack_id?: string;
+  verification_status?:
     | "needs_submission"
     | "pending"
     | "verified"
     | "ineligible";
-  ysws_eligible: boolean;
+  ysws_eligible?: boolean;
 }
 
 export const Route = createFileRoute("/app/_app/auth/callback")({
@@ -46,22 +47,23 @@ export const Route = createFileRoute("/app/_app/auth/callback")({
         }
 
         try {
-          const baseUrl = new URL(request.url).origin;
+          const baseUrl = oidcConfig.publicUrl ?? new URL(request.url).origin;
           const { access_token } = await ofetch<TokenResponse>(
-            "https://auth.hackclub.com/oauth/token",
+            oidcConfig.tokenUrl,
             {
               method: "POST",
-              body: {
-                client_id: process.env.HACKCLUB_CLIENT_ID,
-                client_secret: process.env.HACKCLUB_CLIENT_SECRET,
+              // OAuth 2.0 requires a form-encoded token request (RFC 6749 §4.1.3).
+              body: new URLSearchParams({
+                client_id: oidcConfig.clientId ?? "",
+                client_secret: oidcConfig.clientSecret ?? "",
                 redirect_uri: joinURL(baseUrl, "/app/auth/callback"),
                 code,
                 grant_type: "authorization_code",
-              },
+              }),
             },
           );
           const user = await ofetch<UserInfoResponse>(
-            "https://auth.hackclub.com/oauth/userinfo",
+            oidcConfig.userinfoUrl,
             {
               headers: {
                 Authorization: `Bearer ${access_token}`,
@@ -69,7 +71,20 @@ export const Route = createFileRoute("/app/_app/auth/callback")({
             },
           );
 
-          if (user.verification_status !== "verified") {
+          if (
+            oidcConfig.allowedEmails.length > 0 &&
+            !oidcConfig.allowedEmails.includes(user.email.toLowerCase())
+          ) {
+            throw redirect({
+              to: "/",
+              search: { auth_error: "This account is not allowed to sign in" },
+            });
+          }
+
+          if (
+            oidcConfig.requireVerified &&
+            user.verification_status !== "verified"
+          ) {
             throw redirect({
               to: "/",
               search: { auth_error: "Your account is not ID verified" },
@@ -81,9 +96,9 @@ export const Route = createFileRoute("/app/_app/auth/callback")({
             .values({
               id: user.sub,
               email: user.email,
-              firstName: user.given_name,
-              lastName: user.family_name,
-              slackId: user.slack_id,
+              firstName: user.given_name ?? user.name ?? "",
+              lastName: user.family_name ?? "",
+              slackId: user.slack_id ?? null,
             })
             .onConflictDoNothing({ target: users.id });
 

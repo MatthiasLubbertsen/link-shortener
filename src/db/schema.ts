@@ -13,7 +13,7 @@ export const users = sqliteTable("users", {
   email: text("email").notNull(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  slackId: text("slack_id").notNull(),
+  slackId: text("slack_id"),
 
   isAdmin: int("is_admin", { mode: "boolean" }).notNull().default(false),
 

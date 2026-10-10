@@ -1,0 +1,40 @@
+services:
+  # One-off: creates or updates the database tables. Run before first start
+  # and again after schema changes.
+  migrate:
+    build:
+      context: .
+      target: builder
+    # Runs as root, so hand the data directory to the app user (node, uid 1000) afterwards.
+    command: ["sh", "-c", "pnpm db:push && chown -R 1000:1000 /data"]
+    environment:
+      DATABASE_URL: "file:/data/app.db"
+    volumes:
+      - ./data:/data
+    profiles: ["tools"]
+
+  app:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:/data/app.db"
+      SESSION_SECRET: "${SESSION_SECRET:?set SESSION_SECRET in .env (min 32 chars)}"
+      # Public origin of the shortener, used for the OAuth redirect URI.
+      PUBLIC_URL: "${PUBLIC_URL:?set PUBLIC_URL, e.g. https://go.example.com}"
+      # OIDC provider. Defaults to Hack Club Auth if these are left empty.
+      OIDC_CLIENT_ID: "${OIDC_CLIENT_ID:?set in .env}"
+      OIDC_CLIENT_SECRET: "${OIDC_CLIENT_SECRET:?set in .env}"
+      OIDC_AUTHORIZE_URL: "${OIDC_AUTHORIZE_URL:-https://auth.hackclub.com/oauth/authorize}"
+      OIDC_TOKEN_URL: "${OIDC_TOKEN_URL:-https://auth.hackclub.com/oauth/token}"
+      OIDC_USERINFO_URL: "${OIDC_USERINFO_URL:-https://auth.hackclub.com/oauth/userinfo}"
+      OIDC_SCOPE: "${OIDC_SCOPE:-openid profile email slack_id verification_status}"
+      # Set to false for providers that don't send verification_status (e.g. Tinyauth).
+      OIDC_REQUIRE_VERIFIED: "${OIDC_REQUIRE_VERIFIED:-true}"
+      # Comma-separated emails allowed to sign in. Leave empty to allow anyone the provider accepts.
+      OIDC_ALLOWED_EMAILS: "${OIDC_ALLOWED_EMAILS:-}"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
