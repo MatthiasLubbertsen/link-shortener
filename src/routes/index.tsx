@@ -36,7 +36,7 @@ function RouteComponent() {
         className="mt-4"
         onClick={() => navigate({ to: "/app/auth", reloadDocument: true })}
       >
-        [login with hack club]
+        [login]
       </Button>
     </div>
   );
