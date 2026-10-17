@@ -4,6 +4,7 @@ import { getCookie, setCookie } from "@tanstack/react-start/server";
 import { renderToStaticMarkup } from "react-dom/server";
 import db from "#/db";
 import { linkClicks } from "#/db/schema";
+import { trackRedirect } from "#/lib/liwan";
 import { CloakedTemplate } from "./-cloaked";
 import { getMetaTags } from "./-meta";
 
@@ -211,6 +212,8 @@ export const Route = createFileRoute("/(redirect)/$")({
         await db.insert(linkClicks).values({
           linkId: link.id,
         });
+
+        trackRedirect(request, link);
 
         const redirectUrl = new URL(link.url);
         for (const [key, value] of searchParams.entries()) {

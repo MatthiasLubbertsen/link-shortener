@@ -1,0 +1,68 @@
+# Optional Traefik (v3) setup. Use it on top of docker-compose.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
+#
+# It does two things:
+#   1. Routes the shortener (and Liwan) through your Traefik, which must be
+#      attached to the external docker network "proxy" (override with
+#      TRAEFIK_NETWORK).
+#   2. Redirects https://PORTFOLIO_DOMAIN/<slug> to https://SHORTENER_DOMAIN/<slug>
+#      so short links also work on your main site. Your portfolio container
+#      isn't touched.
+#
+# No entrypoint, TLS or certificate-resolver labels are set: the routers listen
+# on every entrypoint and expect TLS to be terminated before Traefik, which is
+# how a setup where your host handles certificates works. If you terminate TLS
+# in Traefik yourself, add `traefik.http.routers.<name>.tls=true` (and a
+# certresolver) to the routers below.
+#
+# Required in .env:
+#   SHORTENER_DOMAIN  e.g. go.example.com    (must match PUBLIC_URL's host)
+#   PORTFOLIO_DOMAIN  e.g. example.com
+#   LIWAN_DOMAIN      e.g. stats.example.com (only if you use Liwan)
+# Optional in .env:
+#   PORTFOLIO_ASSET_DIRS  top-level folders your portfolio serves that must NOT
+#                         be redirected, separated by | (default below)
+#   TRAEFIK_NETWORK       name of Traefik's docker network (default "proxy")
+
+services:
+  app:
+    networks: [default, proxy]
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "${TRAEFIK_NETWORK:-proxy}"
+
+      # go.example.com -> the shortener
+      traefik.http.routers.shortener.rule: "Host(`${SHORTENER_DOMAIN:?set SHORTENER_DOMAIN in .env}`)"
+      traefik.http.routers.shortener.service: "shortener"
+      traefik.http.services.shortener.loadbalancer.server.port: "3000"
+
+      # example.com/<slug> -> go.example.com/<slug>
+      #
+      # Matches every path except "/", paths containing a dot (link keys can't
+      # contain dots, so these are files like /favicon.ico or /app.js) and the
+      # asset folders listed in PORTFOLIO_ASSET_DIRS. The high priority makes it
+      # win over your portfolio's own router for the paths it matches.
+      traefik.http.routers.slug-redirect.rule: "Host(`${PORTFOLIO_DOMAIN:?set PORTFOLIO_DOMAIN in .env}`) && !Path(`/`) && !PathRegexp(`^/(${PORTFOLIO_ASSET_DIRS:-assets|static|_next|_astro})(/|$$)|\\.`)"
+      traefik.http.routers.slug-redirect.priority: "1000"
+      traefik.http.routers.slug-redirect.service: "noop@internal"
+      traefik.http.routers.slug-redirect.middlewares: "slug-redirect"
+      # Temporary (302), like the shortener's own redirects. The path and query
+      # string are kept.
+      traefik.http.middlewares.slug-redirect.redirectregex.regex: "^https?://[^/]+/(.*)"
+      traefik.http.middlewares.slug-redirect.redirectregex.replacement: "${PUBLIC_URL}/$${1}"
+      traefik.http.middlewares.slug-redirect.redirectregex.permanent: "false"
+
+  liwan:
+    networks: [default, proxy]
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "${TRAEFIK_NETWORK:-proxy}"
+      traefik.http.routers.liwan.rule: "Host(`${LIWAN_DOMAIN:?set LIWAN_DOMAIN in .env}`)"
+      traefik.http.routers.liwan.service: "liwan"
+      traefik.http.services.liwan.loadbalancer.server.port: "9042"
+
+networks:
+  proxy:
+    name: "${TRAEFIK_NETWORK:-proxy}"
+    external: true

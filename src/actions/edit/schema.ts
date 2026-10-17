@@ -1,4 +1,5 @@
 import z from "zod";
+import { isReservedKey } from "#/lib/link";
 
 export const editLinkSchema = z
   .object({
@@ -13,7 +14,7 @@ export const editLinkSchema = z
       )
       .toLowerCase()
       .transform((key) => key.split("/").filter(Boolean).join("/"))
-      .refine((key) => !key.startsWith("app"), "Cannot start with /app"),
+      .refine((key) => !isReservedKey(key), "Cannot start with /app, /api or /mcp"),
     url: z.httpUrl("Invalid URL"),
 
     expiration: z

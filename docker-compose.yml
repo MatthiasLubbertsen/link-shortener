@@ -35,6 +35,30 @@ services:
       OIDC_REQUIRE_VERIFIED: "${OIDC_REQUIRE_VERIFIED:-true}"
       # Comma-separated emails allowed to sign in. Leave empty to allow anyone the provider accepts.
       OIDC_ALLOWED_EMAILS: "${OIDC_ALLOWED_EMAILS:-}"
+      # Optional Liwan analytics: every redirect is also sent to Liwan.
+      # Leave LIWAN_ENTITY_ID empty to turn this off.
+      LIWAN_URL: "${LIWAN_URL:-http://liwan:9042}"
+      LIWAN_ENTITY_ID: "${LIWAN_ENTITY_ID:-}"
     volumes:
       - ./data:/data
     restart: unless-stopped
+
+  # Liwan (https://liwan.dev): privacy-friendly web analytics. After first
+  # start, run `docker compose logs liwan` for the one-time setup link, create
+  # an entity, and put its id in LIWAN_ENTITY_ID.
+  liwan:
+    image: ghcr.io/explodingcamera/liwan:1.8
+    # Public URL of the Liwan dashboard.
+    environment:
+      LIWAN_BASE_URL: "${LIWAN_BASE_URL:-http://localhost:9042}"
+      # The app forwards each visitor's IP in X-Forwarded-For. Only the app
+      # (and your reverse proxy) can reach this container, so trust it.
+      LIWAN_TRUSTED_PROXIES: "*"
+    ports:
+      - "127.0.0.1:9042:9042"
+    volumes:
+      - liwan-data:/data
+    restart: unless-stopped
+
+volumes:
+  liwan-data:

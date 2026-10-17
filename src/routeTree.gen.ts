@@ -9,22 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as redirectSplatRouteImport } from './routes/(redirect)/$'
 import { Route as AppAppRouteRouteImport } from './routes/app/_app/route'
 import { Route as AppAppIndexRouteImport } from './routes/app/_app/index'
 import { Route as AppTemplatesPasswordRouteImport } from './routes/app/_templates/password'
 import { Route as AppTemplatesExpiredRouteImport } from './routes/app/_templates/expired'
+import { Route as ApiV1StatsRouteImport } from './routes/api/v1/stats'
+import { Route as ApiV1OpenapiDotjsonRouteImport } from './routes/api/v1/openapi[.]json'
+import { Route as ApiV1DomainsRouteImport } from './routes/api/v1/domains'
 import { Route as AppAppLinksIndexRouteImport } from './routes/app/_app/links/index'
-import { Route as AppAppDomainsIndexRouteImport } from './routes/app/_app/domains/index'
 import { Route as AppAppAuthIndexRouteImport } from './routes/app/_app/auth/index'
+import { Route as AppAppApiIndexRouteImport } from './routes/app/_app/api/index'
 import { Route as AppAppAnalyticsIndexRouteImport } from './routes/app/_app/analytics/index'
+import { Route as ApiV1LinksIndexRouteImport } from './routes/api/v1/links/index'
 import { Route as AppAppLinksNewRouteImport } from './routes/app/_app/links/new'
 import { Route as AppAppAuthCallbackRouteImport } from './routes/app/_app/auth/callback'
+import { Route as ApiV1LinksIdRouteImport } from './routes/api/v1/links/$id'
 import { Route as AppAppAuthYthIndexRouteImport } from './routes/app/_app/auth/yth/index'
 import { Route as AppAppLinksDomainSplatRouteImport } from './routes/app/_app/links/$domain.$'
 import { Route as AppAppAuthYthCallbackRouteImport } from './routes/app/_app/auth/yth/callback'
+import { Route as ApiV1LinksIdStatsRouteImport } from './routes/api/v1/links/$id.stats'
 
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,14 +67,24 @@ const AppTemplatesExpiredRoute = AppTemplatesExpiredRouteImport.update({
   path: '/app/expired',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1StatsRoute = ApiV1StatsRouteImport.update({
+  id: '/api/v1/stats',
+  path: '/api/v1/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1OpenapiDotjsonRoute = ApiV1OpenapiDotjsonRouteImport.update({
+  id: '/api/v1/openapi.json',
+  path: '/api/v1/openapi.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1DomainsRoute = ApiV1DomainsRouteImport.update({
+  id: '/api/v1/domains',
+  path: '/api/v1/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAppLinksIndexRoute = AppAppLinksIndexRouteImport.update({
   id: '/links/',
   path: '/links/',
-  getParentRoute: () => AppAppRouteRoute,
-} as any)
-const AppAppDomainsIndexRoute = AppAppDomainsIndexRouteImport.update({
-  id: '/domains/',
-  path: '/domains/',
   getParentRoute: () => AppAppRouteRoute,
 } as any)
 const AppAppAuthIndexRoute = AppAppAuthIndexRouteImport.update({
@@ -70,10 +92,20 @@ const AppAppAuthIndexRoute = AppAppAuthIndexRouteImport.update({
   path: '/auth/',
   getParentRoute: () => AppAppRouteRoute,
 } as any)
+const AppAppApiIndexRoute = AppAppApiIndexRouteImport.update({
+  id: '/api/',
+  path: '/api/',
+  getParentRoute: () => AppAppRouteRoute,
+} as any)
 const AppAppAnalyticsIndexRoute = AppAppAnalyticsIndexRouteImport.update({
   id: '/analytics/',
   path: '/analytics/',
   getParentRoute: () => AppAppRouteRoute,
+} as any)
+const ApiV1LinksIndexRoute = ApiV1LinksIndexRouteImport.update({
+  id: '/api/v1/links/',
+  path: '/api/v1/links/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppAppLinksNewRoute = AppAppLinksNewRouteImport.update({
   id: '/links/new',
@@ -84,6 +116,11 @@ const AppAppAuthCallbackRoute = AppAppAuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
   getParentRoute: () => AppAppRouteRoute,
+} as any)
+const ApiV1LinksIdRoute = ApiV1LinksIdRouteImport.update({
+  id: '/api/v1/links/$id',
+  path: '/api/v1/links/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppAppAuthYthIndexRoute = AppAppAuthYthIndexRouteImport.update({
   id: '/auth/yth/',
@@ -100,36 +137,55 @@ const AppAppAuthYthCallbackRoute = AppAppAuthYthCallbackRouteImport.update({
   path: '/auth/yth/callback',
   getParentRoute: () => AppAppRouteRoute,
 } as any)
+const ApiV1LinksIdStatsRoute = ApiV1LinksIdStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => ApiV1LinksIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/mcp': typeof McpRoute
   '/app': typeof AppAppRouteRouteWithChildren
   '/$': typeof redirectSplatRoute
+  '/api/v1/domains': typeof ApiV1DomainsRoute
+  '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
+  '/api/v1/stats': typeof ApiV1StatsRoute
   '/app/expired': typeof AppTemplatesExpiredRoute
   '/app/password': typeof AppTemplatesPasswordRoute
   '/app/': typeof AppAppIndexRoute
+  '/api/v1/links/$id': typeof ApiV1LinksIdRouteWithChildren
   '/app/auth/callback': typeof AppAppAuthCallbackRoute
   '/app/links/new': typeof AppAppLinksNewRoute
+  '/api/v1/links/': typeof ApiV1LinksIndexRoute
   '/app/analytics/': typeof AppAppAnalyticsIndexRoute
+  '/app/api/': typeof AppAppApiIndexRoute
   '/app/auth/': typeof AppAppAuthIndexRoute
-  '/app/domains/': typeof AppAppDomainsIndexRoute
   '/app/links/': typeof AppAppLinksIndexRoute
+  '/api/v1/links/$id/stats': typeof ApiV1LinksIdStatsRoute
   '/app/auth/yth/callback': typeof AppAppAuthYthCallbackRoute
   '/app/links/$domain/$': typeof AppAppLinksDomainSplatRoute
   '/app/auth/yth/': typeof AppAppAuthYthIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/mcp': typeof McpRoute
   '/$': typeof redirectSplatRoute
+  '/api/v1/domains': typeof ApiV1DomainsRoute
+  '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
+  '/api/v1/stats': typeof ApiV1StatsRoute
   '/app/expired': typeof AppTemplatesExpiredRoute
   '/app/password': typeof AppTemplatesPasswordRoute
   '/app': typeof AppAppIndexRoute
+  '/api/v1/links/$id': typeof ApiV1LinksIdRouteWithChildren
   '/app/auth/callback': typeof AppAppAuthCallbackRoute
   '/app/links/new': typeof AppAppLinksNewRoute
+  '/api/v1/links': typeof ApiV1LinksIndexRoute
   '/app/analytics': typeof AppAppAnalyticsIndexRoute
+  '/app/api': typeof AppAppApiIndexRoute
   '/app/auth': typeof AppAppAuthIndexRoute
-  '/app/domains': typeof AppAppDomainsIndexRoute
   '/app/links': typeof AppAppLinksIndexRoute
+  '/api/v1/links/$id/stats': typeof ApiV1LinksIdStatsRoute
   '/app/auth/yth/callback': typeof AppAppAuthYthCallbackRoute
   '/app/links/$domain/$': typeof AppAppLinksDomainSplatRoute
   '/app/auth/yth': typeof AppAppAuthYthIndexRoute
@@ -137,17 +193,24 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/mcp': typeof McpRoute
   '/app/_app': typeof AppAppRouteRouteWithChildren
   '/(redirect)/$': typeof redirectSplatRoute
+  '/api/v1/domains': typeof ApiV1DomainsRoute
+  '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
+  '/api/v1/stats': typeof ApiV1StatsRoute
   '/app/_templates/expired': typeof AppTemplatesExpiredRoute
   '/app/_templates/password': typeof AppTemplatesPasswordRoute
   '/app/_app/': typeof AppAppIndexRoute
+  '/api/v1/links/$id': typeof ApiV1LinksIdRouteWithChildren
   '/app/_app/auth/callback': typeof AppAppAuthCallbackRoute
   '/app/_app/links/new': typeof AppAppLinksNewRoute
+  '/api/v1/links/': typeof ApiV1LinksIndexRoute
   '/app/_app/analytics/': typeof AppAppAnalyticsIndexRoute
+  '/app/_app/api/': typeof AppAppApiIndexRoute
   '/app/_app/auth/': typeof AppAppAuthIndexRoute
-  '/app/_app/domains/': typeof AppAppDomainsIndexRoute
   '/app/_app/links/': typeof AppAppLinksIndexRoute
+  '/api/v1/links/$id/stats': typeof ApiV1LinksIdStatsRoute
   '/app/_app/auth/yth/callback': typeof AppAppAuthYthCallbackRoute
   '/app/_app/links/$domain/$': typeof AppAppLinksDomainSplatRoute
   '/app/_app/auth/yth/': typeof AppAppAuthYthIndexRoute
@@ -156,50 +219,71 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/mcp'
     | '/app'
     | '/$'
+    | '/api/v1/domains'
+    | '/api/v1/openapi.json'
+    | '/api/v1/stats'
     | '/app/expired'
     | '/app/password'
     | '/app/'
+    | '/api/v1/links/$id'
     | '/app/auth/callback'
     | '/app/links/new'
+    | '/api/v1/links/'
     | '/app/analytics/'
+    | '/app/api/'
     | '/app/auth/'
-    | '/app/domains/'
     | '/app/links/'
+    | '/api/v1/links/$id/stats'
     | '/app/auth/yth/callback'
     | '/app/links/$domain/$'
     | '/app/auth/yth/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/mcp'
     | '/$'
+    | '/api/v1/domains'
+    | '/api/v1/openapi.json'
+    | '/api/v1/stats'
     | '/app/expired'
     | '/app/password'
     | '/app'
+    | '/api/v1/links/$id'
     | '/app/auth/callback'
     | '/app/links/new'
+    | '/api/v1/links'
     | '/app/analytics'
+    | '/app/api'
     | '/app/auth'
-    | '/app/domains'
     | '/app/links'
+    | '/api/v1/links/$id/stats'
     | '/app/auth/yth/callback'
     | '/app/links/$domain/$'
     | '/app/auth/yth'
   id:
     | '__root__'
     | '/'
+    | '/mcp'
     | '/app/_app'
     | '/(redirect)/$'
+    | '/api/v1/domains'
+    | '/api/v1/openapi.json'
+    | '/api/v1/stats'
     | '/app/_templates/expired'
     | '/app/_templates/password'
     | '/app/_app/'
+    | '/api/v1/links/$id'
     | '/app/_app/auth/callback'
     | '/app/_app/links/new'
+    | '/api/v1/links/'
     | '/app/_app/analytics/'
+    | '/app/_app/api/'
     | '/app/_app/auth/'
-    | '/app/_app/domains/'
     | '/app/_app/links/'
+    | '/api/v1/links/$id/stats'
     | '/app/_app/auth/yth/callback'
     | '/app/_app/links/$domain/$'
     | '/app/_app/auth/yth/'
@@ -207,14 +291,27 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  McpRoute: typeof McpRoute
   AppAppRouteRoute: typeof AppAppRouteRouteWithChildren
   redirectSplatRoute: typeof redirectSplatRoute
+  ApiV1DomainsRoute: typeof ApiV1DomainsRoute
+  ApiV1OpenapiDotjsonRoute: typeof ApiV1OpenapiDotjsonRoute
+  ApiV1StatsRoute: typeof ApiV1StatsRoute
   AppTemplatesExpiredRoute: typeof AppTemplatesExpiredRoute
   AppTemplatesPasswordRoute: typeof AppTemplatesPasswordRoute
+  ApiV1LinksIdRoute: typeof ApiV1LinksIdRouteWithChildren
+  ApiV1LinksIndexRoute: typeof ApiV1LinksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -257,18 +354,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTemplatesExpiredRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/stats': {
+      id: '/api/v1/stats'
+      path: '/api/v1/stats'
+      fullPath: '/api/v1/stats'
+      preLoaderRoute: typeof ApiV1StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/openapi.json': {
+      id: '/api/v1/openapi.json'
+      path: '/api/v1/openapi.json'
+      fullPath: '/api/v1/openapi.json'
+      preLoaderRoute: typeof ApiV1OpenapiDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/domains': {
+      id: '/api/v1/domains'
+      path: '/api/v1/domains'
+      fullPath: '/api/v1/domains'
+      preLoaderRoute: typeof ApiV1DomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/_app/links/': {
       id: '/app/_app/links/'
       path: '/links'
       fullPath: '/app/links/'
       preLoaderRoute: typeof AppAppLinksIndexRouteImport
-      parentRoute: typeof AppAppRouteRoute
-    }
-    '/app/_app/domains/': {
-      id: '/app/_app/domains/'
-      path: '/domains'
-      fullPath: '/app/domains/'
-      preLoaderRoute: typeof AppAppDomainsIndexRouteImport
       parentRoute: typeof AppAppRouteRoute
     }
     '/app/_app/auth/': {
@@ -278,12 +389,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppAuthIndexRouteImport
       parentRoute: typeof AppAppRouteRoute
     }
+    '/app/_app/api/': {
+      id: '/app/_app/api/'
+      path: '/api'
+      fullPath: '/app/api/'
+      preLoaderRoute: typeof AppAppApiIndexRouteImport
+      parentRoute: typeof AppAppRouteRoute
+    }
     '/app/_app/analytics/': {
       id: '/app/_app/analytics/'
       path: '/analytics'
       fullPath: '/app/analytics/'
       preLoaderRoute: typeof AppAppAnalyticsIndexRouteImport
       parentRoute: typeof AppAppRouteRoute
+    }
+    '/api/v1/links/': {
+      id: '/api/v1/links/'
+      path: '/api/v1/links'
+      fullPath: '/api/v1/links/'
+      preLoaderRoute: typeof ApiV1LinksIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/_app/links/new': {
       id: '/app/_app/links/new'
@@ -298,6 +423,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/auth/callback'
       preLoaderRoute: typeof AppAppAuthCallbackRouteImport
       parentRoute: typeof AppAppRouteRoute
+    }
+    '/api/v1/links/$id': {
+      id: '/api/v1/links/$id'
+      path: '/api/v1/links/$id'
+      fullPath: '/api/v1/links/$id'
+      preLoaderRoute: typeof ApiV1LinksIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/_app/auth/yth/': {
       id: '/app/_app/auth/yth/'
@@ -320,6 +452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppAuthYthCallbackRouteImport
       parentRoute: typeof AppAppRouteRoute
     }
+    '/api/v1/links/$id/stats': {
+      id: '/api/v1/links/$id/stats'
+      path: '/stats'
+      fullPath: '/api/v1/links/$id/stats'
+      preLoaderRoute: typeof ApiV1LinksIdStatsRouteImport
+      parentRoute: typeof ApiV1LinksIdRoute
+    }
   }
 }
 
@@ -328,8 +467,8 @@ interface AppAppRouteRouteChildren {
   AppAppAuthCallbackRoute: typeof AppAppAuthCallbackRoute
   AppAppLinksNewRoute: typeof AppAppLinksNewRoute
   AppAppAnalyticsIndexRoute: typeof AppAppAnalyticsIndexRoute
+  AppAppApiIndexRoute: typeof AppAppApiIndexRoute
   AppAppAuthIndexRoute: typeof AppAppAuthIndexRoute
-  AppAppDomainsIndexRoute: typeof AppAppDomainsIndexRoute
   AppAppLinksIndexRoute: typeof AppAppLinksIndexRoute
   AppAppAuthYthCallbackRoute: typeof AppAppAuthYthCallbackRoute
   AppAppLinksDomainSplatRoute: typeof AppAppLinksDomainSplatRoute
@@ -341,8 +480,8 @@ const AppAppRouteRouteChildren: AppAppRouteRouteChildren = {
   AppAppAuthCallbackRoute: AppAppAuthCallbackRoute,
   AppAppLinksNewRoute: AppAppLinksNewRoute,
   AppAppAnalyticsIndexRoute: AppAppAnalyticsIndexRoute,
+  AppAppApiIndexRoute: AppAppApiIndexRoute,
   AppAppAuthIndexRoute: AppAppAuthIndexRoute,
-  AppAppDomainsIndexRoute: AppAppDomainsIndexRoute,
   AppAppLinksIndexRoute: AppAppLinksIndexRoute,
   AppAppAuthYthCallbackRoute: AppAppAuthYthCallbackRoute,
   AppAppLinksDomainSplatRoute: AppAppLinksDomainSplatRoute,
@@ -353,12 +492,30 @@ const AppAppRouteRouteWithChildren = AppAppRouteRoute._addFileChildren(
   AppAppRouteRouteChildren,
 )
 
+interface ApiV1LinksIdRouteChildren {
+  ApiV1LinksIdStatsRoute: typeof ApiV1LinksIdStatsRoute
+}
+
+const ApiV1LinksIdRouteChildren: ApiV1LinksIdRouteChildren = {
+  ApiV1LinksIdStatsRoute: ApiV1LinksIdStatsRoute,
+}
+
+const ApiV1LinksIdRouteWithChildren = ApiV1LinksIdRoute._addFileChildren(
+  ApiV1LinksIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  McpRoute: McpRoute,
   AppAppRouteRoute: AppAppRouteRouteWithChildren,
   redirectSplatRoute: redirectSplatRoute,
+  ApiV1DomainsRoute: ApiV1DomainsRoute,
+  ApiV1OpenapiDotjsonRoute: ApiV1OpenapiDotjsonRoute,
+  ApiV1StatsRoute: ApiV1StatsRoute,
   AppTemplatesExpiredRoute: AppTemplatesExpiredRoute,
   AppTemplatesPasswordRoute: AppTemplatesPasswordRoute,
+  ApiV1LinksIdRoute: ApiV1LinksIdRouteWithChildren,
+  ApiV1LinksIndexRoute: ApiV1LinksIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

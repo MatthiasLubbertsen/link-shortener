@@ -31,7 +31,7 @@ export default function UserDropdown() {
         <div className="-mx-1.5 flex h-6 items-center gap-2 px-1.5 text-neutral-400 group-hover:bg-neutral-400 group-hover:text-black group-focus:bg-neutral-400 group-focus:text-black group-data-popup-open:bg-neutral-400 group-data-popup-open:text-black">
           <span className="text-xs">{user.firstName}</span>
           <img
-            src={user.slackId ? `https://cachet.dunkirk.sh/users/${user.slackId}/r` : undefined}
+            src={user.avatarUrl}
             alt=""
             className="size-4"
           />
@@ -42,7 +42,7 @@ export default function UserDropdown() {
           <Menu.Popup className="relative w-64 border border-neutral-700 bg-neutral-900 p-3 outline-4 outline-neutral-900">
             <div className="flex items-center gap-3">
               <img
-                src={user.slackId ? `https://cachet.dunkirk.sh/users/${user.slackId}/r` : undefined}
+                src={user.avatarUrl}
                 alt=""
                 className="size-8 flex-none"
               />

@@ -9,8 +9,8 @@ import { getRandomQuote } from "#/lib/quotes";
 
 const nav = [
   { label: "links", value: "/app/links" },
-  { label: "domains", value: "/app/domains" },
   { label: "analytics", value: "/app/analytics" },
+  { label: "api", value: "/app/api" },
 ] as const;
 
 export const Route = createFileRoute("/app/_app")({

@@ -1,5 +1,5 @@
 import { defineRelations } from "drizzle-orm";
-import { domains, linkClicks, links, sessions, users } from "./schema";
+import { apiKeys, domains, linkClicks, links, sessions, users } from "./schema";
 
 export const relations = defineRelations(
   {
@@ -8,6 +8,7 @@ export const relations = defineRelations(
     users,
     sessions,
     domains,
+    apiKeys,
   },
   (r) => ({
     links: {
@@ -17,6 +18,14 @@ export const relations = defineRelations(
       link: r.one.links({
         from: r.linkClicks.linkId,
         to: r.links.id,
+      }),
+    },
+
+    apiKeys: {
+      user: r.one.users({
+        from: r.apiKeys.userId,
+        to: r.users.id,
+        optional: false,
       }),
     },
 
