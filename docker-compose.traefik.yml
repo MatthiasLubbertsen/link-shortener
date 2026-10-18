@@ -3,7 +3,7 @@
 #   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
 #
 # It does two things:
-#   1. Routes the shortener (and Liwan) through your Traefik, which must be
+#   1. Routes the shortener through your Traefik, which must be
 #      attached to the external docker network "proxy" (override with
 #      TRAEFIK_NETWORK).
 #   2. Redirects https://PORTFOLIO_DOMAIN/<slug> to https://SHORTENER_DOMAIN/<slug>
@@ -19,7 +19,6 @@
 # Required in .env:
 #   SHORTENER_DOMAIN  e.g. go.example.com    (must match PUBLIC_URL's host)
 #   PORTFOLIO_DOMAIN  e.g. example.com
-#   LIWAN_DOMAIN      e.g. stats.example.com (only if you use Liwan)
 # Optional in .env:
 #   PORTFOLIO_ASSET_DIRS  top-level folders your portfolio serves that must NOT
 #                         be redirected, separated by | (default below)
@@ -36,6 +35,8 @@ services:
       traefik.http.routers.shortener.rule: "Host(`${SHORTENER_DOMAIN:?set SHORTENER_DOMAIN in .env}`)"
       traefik.http.routers.shortener.service: "shortener"
       traefik.http.services.shortener.loadbalancer.server.port: "3000"
+      # (The app must be on Traefik's network even for the redirect router
+      # below, or Traefik skips the container for lack of an address.)
 
       # example.com/<slug> -> go.example.com/<slug>
       #
@@ -52,15 +53,6 @@ services:
       traefik.http.middlewares.slug-redirect.redirectregex.regex: "^https?://[^/]+/(.*)"
       traefik.http.middlewares.slug-redirect.redirectregex.replacement: "${PUBLIC_URL}/$${1}"
       traefik.http.middlewares.slug-redirect.redirectregex.permanent: "false"
-
-  liwan:
-    networks: [default, proxy]
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "${TRAEFIK_NETWORK:-proxy}"
-      traefik.http.routers.liwan.rule: "Host(`${LIWAN_DOMAIN:?set LIWAN_DOMAIN in .env}`)"
-      traefik.http.routers.liwan.service: "liwan"
-      traefik.http.services.liwan.loadbalancer.server.port: "9042"
 
 networks:
   proxy:

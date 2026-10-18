@@ -36,17 +36,22 @@ services:
       # Comma-separated emails allowed to sign in. Leave empty to allow anyone the provider accepts.
       OIDC_ALLOWED_EMAILS: "${OIDC_ALLOWED_EMAILS:-}"
       # Optional Liwan analytics: every redirect is also sent to Liwan.
-      # Leave LIWAN_ENTITY_ID empty to turn this off.
+      # Leave LIWAN_ENTITY_ID empty to turn this off. LIWAN_URL must be
+      # reachable from this container (the bundled "liwan" service below, or
+      # your own instance).
       LIWAN_URL: "${LIWAN_URL:-http://liwan:9042}"
       LIWAN_ENTITY_ID: "${LIWAN_ENTITY_ID:-}"
     volumes:
       - ./data:/data
     restart: unless-stopped
 
-  # Liwan (https://liwan.dev): privacy-friendly web analytics. After first
-  # start, run `docker compose logs liwan` for the one-time setup link, create
-  # an entity, and put its id in LIWAN_ENTITY_ID.
+  # Optional bundled Liwan (https://liwan.dev), only started with
+  # `docker compose --profile liwan up -d`. Skip it if you already run Liwan
+  # and point LIWAN_URL at that instead. After first start, run
+  # `docker compose logs liwan` for the one-time setup link, create an entity,
+  # and put its id in LIWAN_ENTITY_ID.
   liwan:
+    profiles: ["liwan"]
     image: ghcr.io/explodingcamera/liwan:1.8
     # Public URL of the Liwan dashboard.
     environment:

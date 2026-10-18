@@ -163,14 +163,20 @@ tools: `list_domains`, `list_links`, `get_link`, `create_link`, `update_link`, `
 
 the app can report every redirect to [Liwan](https://liwan.dev), a small privacy-friendly analytics tool. the built-in click counts keep working either way.
 
-1. `docker compose up -d` also starts a `liwan` container. set `LIWAN_BASE_URL` in `.env` to the public URL where you'll reach it.
+**already running Liwan?** skip to step 3. create the entity, set `LIWAN_ENTITY_ID`, and set `LIWAN_URL` to an address the app container can reach (see below).
+
+**new to Liwan?** the compose file has an optional bundled instance:
+
+1. `docker compose --profile liwan up -d` also starts a `liwan` container. set `LIWAN_BASE_URL` in `.env` to the public URL where you'll reach it.
 2. run `docker compose logs liwan` and open the one-time setup link to create your account.
 3. in Liwan, create an entity. its **domain** should be your shortener's domain (e.g. `go.example.com`).
-4. put the entity's id in `LIWAN_ENTITY_ID` in `.env` and run `docker compose up -d` again.
+4. put the entity's id in `LIWAN_ENTITY_ID` in `.env` and run `docker compose up -d` again (with `--profile liwan` if you use the bundled one).
 
 each redirect sends a `pageview` event to Liwan with the short URL path, the visitor's user agent and IP (from `X-Forwarded-For`, so keep your reverse proxy setting it), the referrer, and a `key` and `destination` (host only) property. only UTM-style query parameters are kept. the event is sent in the background, so a slow or down Liwan never delays a redirect.
 
-by default `LIWAN_URL` is `http://liwan:9042` (the compose service). set it yourself to use a Liwan that runs elsewhere. leaving `LIWAN_ENTITY_ID` empty turns this off.
+by default `LIWAN_URL` is `http://liwan:9042` (the bundled service). leaving `LIWAN_ENTITY_ID` empty turns this off.
+
+**using a Liwan from another compose project:** the app has to be able to reach it. the simplest way is to put both containers on a shared docker network (e.g. the `proxy` network) and set `LIWAN_URL=http://<liwan container name>:9042`. Liwan only trusts `X-Forwarded-For` from the proxies in `trusted_proxies` (default: loopback), so also add the shared network's subnet (`docker network inspect <network>`) to `trusted_proxies` in your Liwan config. otherwise visitor IPs (and so unique visitors and geo data) won't be recorded.
 
 ## serving short links on your main domain (Traefik)
 
@@ -180,13 +186,17 @@ say your portfolio is a single page on `example.com` and the shortener is on `go
 docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d
 ```
 
-set `SHORTENER_DOMAIN`, `PORTFOLIO_DOMAIN` and `LIWAN_DOMAIN` in `.env` (see `.env.example`). the file assumes Traefik v3 and that Traefik is on an external docker network called `proxy` (change with `TRAEFIK_NETWORK`). it doesn't set entrypoints or TLS, so the routers listen on all entrypoints and expect TLS to be handled before Traefik. add `tls` / `certresolver` labels if you terminate TLS in Traefik.
+set `SHORTENER_DOMAIN` and `PORTFOLIO_DOMAIN` in `.env` (see `.env.example`). the file assumes Traefik v3 and that Traefik is on an external docker network called `proxy` (change with `TRAEFIK_NETWORK`). it doesn't set entrypoints or TLS, so the routers listen on all entrypoints and expect TLS to be handled before Traefik. add `tls` / `certresolver` labels if you terminate TLS in Traefik.
 
 the redirect router matches every path on your main domain **except**:
 
 - `/` (your portfolio)
 - anything with a dot in it, like `/favicon.ico` or `/main.css`. link keys can't contain dots, so these can never be short links
 - top-level folders in `PORTFOLIO_ASSET_DIRS`, default `assets|static|_next|_astro`. add the folder your portfolio serves its files from if it's something else, or those files will redirect
+
+**using your own compose file** (e.g. one that runs the prebuilt image)? copy the labels and the `proxy` network from `docker-compose.traefik.yml` into your `app` service. replace the `${...}` variables with your values, and write `$$` as a single `$` if you're not using compose interpolation.
+
+this only works if requests for your main domain actually reach Traefik. if something in front of Traefik (a reverse proxy, a host-level proxy) sends your main domain straight to the portfolio container, point it at Traefik instead, or add the redirect there.
 
 things to know:
 
