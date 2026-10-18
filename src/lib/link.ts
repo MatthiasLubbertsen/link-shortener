@@ -42,3 +42,11 @@ export function getDynamicLinkData(key: string) {
     pattern,
   };
 }
+
+// Top-level paths used by the app itself; a link can't start with these.
+const RESERVED_PREFIXES = ["app", "api", "mcp"];
+
+export function isReservedKey(key: string) {
+  const first = key.split("/")[0];
+  return key.startsWith("app") || RESERVED_PREFIXES.includes(first);
+}

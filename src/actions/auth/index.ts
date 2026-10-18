@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { maybeAuth } from "./middleware";
+import { gravatarUrl } from "#/lib/gravatar";
 import { deleteSession } from "#/lib/session";
 
 export const getCurrentUser = createServerFn()
@@ -12,7 +13,7 @@ export const getCurrentUser = createServerFn()
       firstName: context.user.firstName,
       lastName: context.user.lastName,
       email: context.user.email,
-      slackId: context.user.slackId,
+      avatarUrl: gravatarUrl(context.user.email),
     };
   });
 

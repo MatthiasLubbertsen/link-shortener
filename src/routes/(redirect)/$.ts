@@ -4,7 +4,9 @@ import { getCookie, setCookie } from "@tanstack/react-start/server";
 import { renderToStaticMarkup } from "react-dom/server";
 import db from "#/db";
 import { linkClicks } from "#/db/schema";
+import { trackRedirect } from "#/lib/liwan";
 import { CloakedTemplate } from "./-cloaked";
+import { notFoundResponse } from "./-not-found";
 import { getMetaTags } from "./-meta";
 
 export async function verifyPlainPassword(one: string, two: string) {
@@ -127,11 +129,11 @@ export const Route = createFileRoute("/(redirect)/$")({
   server: {
     handlers: {
       async GET({ params, request }) {
+        const domain = new URL(request.url).hostname;
         if (!params._splat) {
-          return new Response("Link not found", { status: 404 });
+          return notFoundResponse(domain);
         }
 
-        const domain = new URL(request.url).hostname;
         const searchParams = new URL(request.url).searchParams;
 
         const searchPw = searchParams.get("pw");
@@ -139,7 +141,7 @@ export const Route = createFileRoute("/(redirect)/$")({
 
         const link = await getLink(domain, params._splat);
         if (!link) {
-          return new Response("Link not found", { status: 404 });
+          return notFoundResponse(new URL(request.url).host, params._splat);
         }
 
         if (link.expirationDate && new Date(link.expirationDate) < new Date()) {
@@ -211,6 +213,8 @@ export const Route = createFileRoute("/(redirect)/$")({
         await db.insert(linkClicks).values({
           linkId: link.id,
         });
+
+        trackRedirect(request, link);
 
         const redirectUrl = new URL(link.url);
         for (const [key, value] of searchParams.entries()) {

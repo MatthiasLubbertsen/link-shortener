@@ -3,7 +3,7 @@ import { getCookie } from "@tanstack/react-start/server";
 import { ofetch } from "ofetch";
 import { joinURL } from "ufo";
 import db from "#/db";
-import { users } from "#/db/schema";
+import { domains, users } from "#/db/schema";
 import { oidcConfig } from "#/lib/oidc";
 import { createSession } from "#/lib/session";
 
@@ -101,6 +101,13 @@ export const Route = createFileRoute("/app/_app/auth/callback")({
               slackId: user.slack_id ?? null,
             })
             .onConflictDoNothing({ target: users.id });
+
+          // Make sure the shortener's own domain exists, so there's no manual
+          // database step. The first person to sign in owns it.
+          await db
+            .insert(domains)
+            .values({ domain: new URL(baseUrl).hostname, userId: user.sub })
+            .onConflictDoNothing({ target: domains.domain });
 
           await createSession(user.sub);
         } catch (_e) {

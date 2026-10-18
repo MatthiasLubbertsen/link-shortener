@@ -29,6 +29,27 @@ export const sessions = sqliteTable("sessions", {
   expiresAt: int("expires_at", { mode: "timestamp" }).notNull(),
 });
 
+export const apiKeys = sqliteTable(
+  "api_keys",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => cuid2()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    // first characters of the key, shown in the UI so keys are recognisable
+    prefix: text("prefix").notNull(),
+    // SHA-256 of the full key; the key itself is only shown once
+    hash: text("hash").notNull(),
+
+    lastUsedAt: int("last_used_at", { mode: "timestamp" }),
+    createdAt: timestamps.createdAt,
+  },
+  (table) => [uniqueIndex("api_key_hash_idx").on(table.hash)],
+);
+
 export const domains = sqliteTable("domains", {
   domain: text("domain").primaryKey(),
   userId: text("user_id")
