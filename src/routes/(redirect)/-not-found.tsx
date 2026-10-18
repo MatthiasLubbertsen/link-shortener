@@ -8,8 +8,7 @@ const css = `
   *{box-sizing:border-box}
   body{margin:0;background:#171717;color:#fff;font-family:"JetBrains Mono Variable","JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
   main{max-width:28rem;margin:0 auto;padding:2rem;text-align:center}
-  .card{position:relative;isolation:isolate;overflow:hidden;border:1px solid #404040;padding:1.25rem 1rem}
-  .glow{position:absolute;inset:-.5rem 0 auto 0;height:1rem;z-index:-1;border-radius:0 0 50% 50%;background:#fca5a5;filter:blur(40px)}
+  .card{padding:1.25rem 1rem}
   .code{font-size:2.5rem;font-weight:700;line-height:1;margin:0}
   h1{font-size:14px;margin:.5rem 0 0}
   .msg{margin:.5rem 0 0;font-size:12px;color:#a3a3a3}
@@ -36,7 +35,6 @@ function NotFoundTemplate({ host, path }: { host: string; path: string }) {
       <body>
         <main>
           <div className="card">
-            <div className="glow" />
             <p className="code">404</p>
             <h1>link not found</h1>
             <p className="msg">{getRandomNotFoundMessage()}</p>
