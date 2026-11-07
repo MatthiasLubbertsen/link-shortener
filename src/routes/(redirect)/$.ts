@@ -4,6 +4,7 @@ import { getCookie, setCookie } from "@tanstack/react-start/server";
 import { renderToStaticMarkup } from "react-dom/server";
 import db from "#/db";
 import { linkClicks } from "#/db/schema";
+import { substituteUrlParams } from "#/lib/link";
 import { trackRedirect } from "#/lib/liwan";
 import { CloakedTemplate } from "./-cloaked";
 import { notFoundResponse } from "./-not-found";
@@ -104,16 +105,10 @@ async function getLink(domain: string, key: string) {
       );
 
       // https://example.com/users/:id -> https://example.com/users/123
-      const url = dynamicLink.url
-        .split("/")
-        .map((part) => {
-          if (part.startsWith(":")) {
-            const param = part.slice(1);
-            return dynamicParams[param] || part;
-          }
-          return part;
-        })
-        .join("/");
+      // https://:sub.example.com -> https://foo.example.com
+      const url = substituteUrlParams(dynamicLink.url, dynamicParams);
+      // a host param got a value that isn't a valid hostname label
+      if (url === null) continue;
 
       return {
         ...dynamicLink,

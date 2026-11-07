@@ -6,7 +6,7 @@ import z from "zod";
 import { editLinkSchema } from "#/actions/edit/schema";
 import db from "#/db";
 import { linkClicks, links } from "#/db/schema";
-import { genLinkKey, getDynamicLinkData } from "#/lib/link";
+import { dynamicHttpUrl, genLinkKey, getDynamicLinkData } from "#/lib/link";
 import { oidcConfig } from "#/lib/oidc";
 import { ApiError } from "./errors";
 
@@ -18,7 +18,7 @@ type LinkRow = typeof links.$inferSelect;
 const nullableUrl = z.httpUrl("Invalid URL").nullable();
 
 export const createLinkInput = z.strictObject({
-  url: z.httpUrl("Invalid URL"),
+  url: dynamicHttpUrl("Invalid URL"),
   domain: z.string().min(1).optional(),
   key: z.string().optional(),
   expirationDate: z.iso.datetime({ offset: true }).nullable().optional(),

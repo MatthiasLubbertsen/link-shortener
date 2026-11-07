@@ -1,5 +1,5 @@
 import z from "zod";
-import { isReservedKey } from "#/lib/link";
+import { dynamicHttpUrl, getUrlParamNames, isReservedKey } from "#/lib/link";
 
 export const editLinkSchema = z
   .object({
@@ -14,8 +14,11 @@ export const editLinkSchema = z
       )
       .toLowerCase()
       .transform((key) => key.split("/").filter(Boolean).join("/"))
-      .refine((key) => !isReservedKey(key), "Cannot start with /app, /api or /mcp"),
-    url: z.httpUrl("Invalid URL"),
+      .refine(
+        (key) => !isReservedKey(key),
+        "Cannot start with /app, /api or /mcp",
+      ),
+    url: dynamicHttpUrl("Invalid URL"),
 
     expiration: z
       .object({
@@ -48,11 +51,7 @@ export const editLinkSchema = z
     const keyParams = keyParts.filter((part) => part.startsWith(":"));
     const notKeyParams = keyParts.filter((part) => !part.startsWith(":"));
 
-    const urlParts = val.url
-      .replace(/^https?:\/\//, "")
-      .split("/")
-      .filter(Boolean);
-    const urlParams = urlParts.filter((part) => part.startsWith(":"));
+    const urlParams = getUrlParamNames(val.url);
 
     if (notKeyParams.some((part) => part.includes(":") || part.includes("*"))) {
       ctx.addIssue({
@@ -87,11 +86,11 @@ export const editLinkSchema = z
         });
       }
     }
-    for (const part of urlParams) {
-      if (!keyParams.includes(part)) {
+    for (const name of urlParams) {
+      if (!keyParams.includes(`:${name}`)) {
         ctx.addIssue({
           code: "custom",
-          message: `Parameter ${part.slice(1)} is not defined in key`,
+          message: `Parameter ${name} is not defined in key`,
           path: ["url"],
         });
       }

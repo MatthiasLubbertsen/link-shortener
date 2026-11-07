@@ -1,5 +1,5 @@
 import z from "zod";
-import { isReservedKey } from "#/lib/link";
+import { dynamicHttpUrl, isReservedKey } from "#/lib/link";
 
 export const createLinkSchema = z.object({
   domain: z.string().min(1, "Required"),
@@ -12,6 +12,9 @@ export const createLinkSchema = z.object({
     )
     .toLowerCase()
     .transform((key) => key.split("/").filter(Boolean).join("/"))
-    .refine((key) => !isReservedKey(key), "Cannot start with /app, /api or /mcp"),
-  url: z.httpUrl("Invalid URL"),
+    .refine(
+      (key) => !isReservedKey(key),
+      "Cannot start with /app, /api or /mcp",
+    ),
+  url: dynamicHttpUrl("Invalid URL"),
 });
